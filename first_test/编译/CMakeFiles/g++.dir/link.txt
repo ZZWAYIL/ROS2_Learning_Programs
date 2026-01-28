@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/g++.dir/learn_gcc.cpp.o -o g++ 
