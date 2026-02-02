@@ -17,9 +17,10 @@ class FaceDetectNode(Node):
         self.bridge = CvBridge()
         # 加载资源文件路径
         self.resource_path = get_package_share_directory('demo_python_service') + '/resource/default.jpg'
-
-        self.model = "hog"  # 可选值: "hog" 或 "cnn"
-        self.upsample_times = 1  # 图像上采样次数
+        self.declare_parameter('model','hog')  # 声明参数
+        self.declare_parameter("number_of_times_to_upsample",1) # 声明参数
+        self.model = self.get_parameter('model').get_parameter_value().string_value
+        self.upsample_times = self.get_parameter('number_of_times_to_upsample').get_parameter_value().integer_value
     
     def face_detect_callback(self,request,response):
         if request.image.data:

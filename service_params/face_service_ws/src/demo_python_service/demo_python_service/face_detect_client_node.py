@@ -1,11 +1,12 @@
 import rclpy
 from rclpy.node import Node
 from face_interfaces.srv import FaceDetector
-import face_recognition
 import cv2
 from ament_index_python.packages import get_package_share_directory # 获得包的share路径
 from cv_bridge import CvBridge
-import time
+from rcl_interfaces.srv import SetParameters
+from rcl_interfaces.msg import Parameter,ParameterValue,ParameterType
+
 
 class FaceDetectClientNode(Node):
     def __init__(self,node_name):
@@ -19,6 +20,41 @@ class FaceDetectClientNode(Node):
         self.resource_path = get_package_share_directory('demo_python_service') + '/resource/persons.jpg'
         # 读取图像
         self.image = cv2.imread(self.resource_path)
+
+        self.declare_parameter('model','hog')  # 声明参数
+        self.declare_parameter("number_of_times_to_upsample",1) # 声明参数
+        default_model = self.get_parameter('model').get_parameter_value().string_value
+        default_upsample = self.get_parameter('number_of_times_to_upsample').get_parameter_value().integer_value
+        
+    # 创建服务客户端请求函数
+    def call_set_parameters(self,parameters):
+        """
+        调用服务客户端请求函数
+        """
+        # 创建服务客户端
+        updata_params_client = self.create_client(SetParameters,'/face_detect_service_node/set_parameters')
+        while updata_params_client.wait_for_service(timeout_sec=1.0) is False:
+            self.get_logger().info('SetParameters service not available, waiting again...')
+        # 创建请求
+        request = SetParameters.Request()
+        request.parameters = parameters
+        future = updata_params_client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+        return response
+
+    def updata_parameters(self,model = 'hog'):
+        params = Parameter()
+        params.name = 'model'
+        parameter_value = ParameterValue()
+        parameter_value.type = ParameterType.PARAMETER_STRING
+        parameter_value.string_value = model
+        params.value = parameter_value
+        response = self.call_set_parameters([params])
+        for result in response.results:
+            self.get_logger().info('Update parameter %d,reason: %s' % (result.successful, result.reason))
+
+
 
     def send_request(self):
         # 等待服务可用
@@ -38,7 +74,7 @@ class FaceDetectClientNode(Node):
         #     rclpy.spin_once(self)  # 会阻塞，直到有新的数据到来才会返回，这样对单线程不友好，有可能阻塞其他回调函数的执行
         rclpy.spin_until_future_complete(self, future)  # 会一直运行当前节点，直到future对象中有结果返回为止，更适合单线程
         response = future.result()
-        self.show_response(response)
+        # self.show_response(response)
         self.get_logger().info('received response, face count: %d, use time: %.4f seconds' % (response.count, response.use_time))
 
     def show_response(self,response):
@@ -56,6 +92,10 @@ class FaceDetectClientNode(Node):
 def main():
     rclpy.init()
     node = FaceDetectClientNode('face_detect_client_node')
+    node.updata_parameters(model='cnn')
     node.send_request()
+    node.updata_parameters(model='hog')
+    node.send_request()
+
     rclpy.spin(node)
     rclpy.shutdown()
