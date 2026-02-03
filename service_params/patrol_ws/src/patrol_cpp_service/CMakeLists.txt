@@ -23,6 +23,10 @@ install(
     patrol_client
   DESTINATION lib/${PROJECT_NAME}
 )
+# 安装 launch 文件夹
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

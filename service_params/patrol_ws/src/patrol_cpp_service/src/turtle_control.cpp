@@ -54,7 +54,7 @@ public:
         });
 
         patrol_service_ = this->create_service<Patrol>(
-            "turtle_patrol",
+            "/turtle_patrol",
             [this](const std::shared_ptr<Patrol::Request> request, std::shared_ptr<Patrol::Response> response) -> void
             {
                 // 边界判断
@@ -79,7 +79,7 @@ public:
         
         // 定时器
         timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(500),
+            std::chrono::milliseconds(200),
             std::bind(&TurtleTrackNode::Cmd_Pub, this));
     }
 
@@ -114,11 +114,11 @@ public:
         // 分开控制角度和距离
         if(distance > 0.1){
             if(std::abs(angle_diff) > 0.1){
-                twist_msg.linear.x = 0.0;
-                twist_msg.angular.z = 2*angle_diff;
+                twist_msg.linear.x = 0.2*distance;
+                twist_msg.angular.z = 1.8 * angle_diff;
             }
             else {
-                twist_msg.linear.x = 0.5*distance;
+                twist_msg.linear.x = 0.9*distance;
                 twist_msg.angular.z = angle_diff;
             }
         } else {
@@ -129,7 +129,7 @@ public:
         // // 同时控制角度和距离
         // if (distance > 0.1)
         // {
-        //     twist_msg.linear.x = 0.5 * distance;
+        //     twist_msg.linear.x = 0.8 * distance;
         //     twist_msg.angular.z = angle_diff;
         // }
         // else
