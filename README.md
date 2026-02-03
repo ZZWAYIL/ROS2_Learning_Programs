@@ -12,15 +12,6 @@
 - topic/: 话题/接口相关实验工作区
 - turtle_params.yaml: 示例参数文件（默认被 .gitignore 忽略）
 
-## .gitignore 说明
-
-以下内容为本仓库默认忽略项（不会被 Git 跟踪），若需要提交请从 .gitignore 中移除：
-
-- .vscode/: 本地编辑器配置
-- learning_ros2/: 学习工作区（体积较大，默认不跟踪）
-- topic/interface_ws: 话题/接口工作区（默认不跟踪）
-- *log/、*build/、*install/: 运行/构建产物
-- turtle_params.yaml: 本地参数文件
 
 ## 子工作区构建与运行
 
